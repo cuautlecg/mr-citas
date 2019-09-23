@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DoctorController extends Controller
 {
@@ -14,7 +16,7 @@ class DoctorController extends Controller
      */
     public function index()
     {
-        $doctors = User::all();
+        $doctors = User::doctors()->get();
         return view('doctors.index', compact('doctors'));
     }
 
@@ -36,7 +38,24 @@ class DoctorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'name' => 'required|min:3',
+            'email' => 'required|email',
+            'cedula' => 'nullable|digits:8',
+            'address' => 'nullable|min:5',
+            'phone' => 'nullable|min:6'
+        ];
+        $this->validate($request, $rules);
+
+        User::create(
+            $request->only('name', 'email', 'cedula', 'address', 'phone')
+            + [
+                'role'=> 'doctor',
+                'password' => bcrypt($request->input('password'))
+            ]
+        );
+
+        return redirect('doctors')->with('success', 'Se ha registrado al doctor: "' . $request->input('name') . '" correctamente');
     }
 
     /**
@@ -58,7 +77,8 @@ class DoctorController extends Controller
      */
     public function edit($id)
     {
-        //
+        $doctor = User::findOrFail($id);
+        return view('doctors.edit', compact('doctor'));
     }
 
     /**
@@ -70,7 +90,26 @@ class DoctorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+            'name' => 'required|min:3',
+            'email' => 'required|email',
+            'cedula' => 'nullable|digits:8',
+            'address' => 'nullable|min:5',
+            'phone' => 'nullable|min:6'
+        ];
+        $this->validate($request, $rules);
+
+        $user = User::doctors()->findOrFail($id);
+
+        $data = $request->only('name', 'email', 'cedula', 'address', 'phone');
+        $password = $request->input('password');
+        if ($password) {
+            $data['password'] = bcrypt($password);
+        }
+
+        $user->fill($data);
+        $user->save();
+        return redirect('doctors')->with('success', 'Se ha modificado la información del médico: "' . $request->input('name') . '" correctamente');
     }
 
     /**
@@ -79,8 +118,12 @@ class DoctorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $doctor)
     {
-        //
+        $doctorName = $doctor->name;
+        $doctor->delete();
+
+        return redirect('doctors')->with('success', 'Se elimino de manera correcta al médico: "' . $doctorName . '" correctamente');
+
     }
 }

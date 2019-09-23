@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
@@ -14,8 +15,8 @@ class PatientController extends Controller
      */
     public function index()
     {
-        $patients = User::all();
-        return view('patients.index', compact('patients'));
+        $patients = User::patients()->paginate(10);
+        return view('patients.index', ['patients' => $patients]);
     }
 
     /**

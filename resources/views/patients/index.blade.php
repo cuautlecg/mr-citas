@@ -63,8 +63,7 @@
                         {{$patient->address}}
                     </td>
                     <td>
-                        <a href="{{url('patients/' . $patient->id .'/edit')}}"
-                            class="btn btn-primary btn-sm">Editar</a>
+                        <a href="{{url('patients/' . $patient->id .'/edit')}}" class="btn btn-primary btn-sm">Editar</a>
                         <a href="{{url('patients/' . $patient->id)}}" class="btn btn-danger btn-sm" onclick="event.preventDefault();
                             document.getElementById('delete-form').submit();">
                             Eliminar
@@ -79,6 +78,9 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
+    <div class="card-body">
+        {{$patients->links()}}
     </div>
 </div>
 @endsection
