@@ -37,7 +37,23 @@ class PatientController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'name' => 'required|min:3',
+            'email' => 'required|email',
+            'address' => 'nullable|min:5',
+            'phone' => 'nullable|min:6'
+        ];
+        $this->validate($request, $rules);
+
+        User::create(
+            $request->only('name', 'email', 'address', 'phone')
+            + [
+                'role'=> 'patient',
+                'password' => bcrypt($request->input('password'))
+            ]
+        );
+
+        return redirect('patients')->with('success', 'Se ha registrado al paciente: "' . $request->input('name') . '" correctamente');
     }
 
     /**
@@ -59,7 +75,8 @@ class PatientController extends Controller
      */
     public function edit($id)
     {
-        //
+        $patient = User::patients()->findOrFail($id);
+        return view('patients.edit', compact('patient'));
     }
 
     /**
@@ -71,7 +88,27 @@ class PatientController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $rules = [
+            'name' => 'required|min:3',
+            'email' => 'required|email',
+            'address' => 'nullable|min:5',
+            'phone' => 'nullable|min:6'
+        ];
+        $this->validate($request, $rules);
+
+        $patient = User::patients()->findOrFail($id);
+
+        $data = $request->only('name', 'email', 'address', 'phone');
+        $password = $request->input('password');
+
+        if ($password) {
+            $data['password'] = bcrypt($password);
+        }
+
+        $patient->fill($data);
+        $patient->save();
+
+        return redirect('patients')->with('success', 'Se ha modificado la información del paciente: "' . $request->input('name') . '" correctamente');
     }
 
     /**
@@ -80,8 +117,11 @@ class PatientController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $patient)
     {
-        //
+        $patientName = $patient->name;
+        $patient->delete();
+
+        return redirect('patients')->with('success', 'Se elimino de manera correcta al paciente: "' . $patientName . '" correctamente');
     }
 }
