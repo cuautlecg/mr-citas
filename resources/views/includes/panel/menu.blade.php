@@ -45,12 +45,12 @@
         </li>
     @else
         <li class="nav-item" class="active">
-            <a class=" nav-link active " href="/index">
+            <a class=" nav-link active " href="/appointments/create">
                 <i class="ni ni-send text-danger"></i>Reservar cita
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link " href="/specialties">
+            <a class="nav-link " href="/appointments">
                 <i class="ni ni-bullet-list-67 text-orange"></i> Mis citas
             </a>
         </li>

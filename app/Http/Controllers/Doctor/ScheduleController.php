@@ -5,32 +5,57 @@ namespace App\Http\Controllers\Doctor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\WorkDay;
+use Illuminate\Support\Carbon;
 
 class ScheduleController extends Controller
 {
+    private $days = [
+        'Lunes', 'Martes', 'Miércoles',
+        'Jueves', 'Viernes', 'Sábado', 'Domingo'
+    ];
+
     public function edit()
     {
-        $days = [
-            'Lunes',
-            'Martes',
-            'Miércoles',
-            'Jueves',
-            'Viernes',
-            'Sábado',
-            'Domingo',
-        ];
-        return view('schedule', compact('days'));
+
+
+        $workDays = WorkDay::where('user_id', auth()->id())->get();
+
+        $workDays->map(function ($workDay){
+            $workDay->morning_start = (new Carbon($workDay->morning_start))->format('g:i A');
+            $workDay->morning_end = (new Carbon($workDay->morning_end))->format('g:i A');
+            $workDay->afternoon_start = (new Carbon($workDay->afternoon_start))->format('g:i A');
+            $workDay->afternoon_end = (new Carbon($workDay->afternoon_end))->format('g:i A');
+        });
+
+        //dd($workDays->toArray());
+
+        $days = $this->days;
+
+        return view('schedule', compact('workDays','days'));
     }
 
     public function store(Request $request)
     {
+        //dd($request->all());
         $active = $request->input('active') ?: [];
         $morning_start = $request->input('morning_start');
         $morning_end = $request->input('morning_end');
         $afternoon_start = $request->input('afternoon_start');
         $afternoon_end = $request->input('afternoon_end');
 
-        for($i=0; $i<7; $i++)
+        $errors = [];
+
+        for($i=0; $i<7; $i++){
+
+            if ($morning_start[$i] > $morning_end[$i]) {
+                $errors[] = 'Los horarios del día "' . $this->days[$i] . '" en el turno matutino, son inconsistentes, favor de validar.';
+            }
+
+            if ($afternoon_start[$i] > $afternoon_end[$i]) {
+                $errors[] = 'Los horarios del día "' . $this->days[$i] . '" en el turno vespertino, son inconsistentes, favor de validar.';
+            }
+
+
             WorkDay::updateOrCreate(
                 [
                     'day' => $i,
@@ -44,7 +69,14 @@ class ScheduleController extends Controller
                     'afternoon_end' => $afternoon_end[$i]
                 ]
             );
+        }
 
-        return back();
+        if (count($errors) > 0) {
+            return back()->with(compact('errors'));
+        }
+
+        $success = 'Los cambios se han guardado correctamente';
+        return back()->with(compact('success'));
+
     }
 }
