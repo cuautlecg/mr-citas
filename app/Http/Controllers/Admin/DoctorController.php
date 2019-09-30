@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Specialty;
 
 class DoctorController extends Controller
 {
@@ -26,7 +27,8 @@ class DoctorController extends Controller
      */
     public function create()
     {
-        return view('doctors.create');
+        $specialties = Specialty::all();
+        return view('doctors.create', compact('specialties'));
     }
 
     /**
@@ -37,6 +39,8 @@ class DoctorController extends Controller
      */
     public function store(Request $request)
     {
+        //dd($request->all());
+
         $rules = [
             'name' => 'required|min:3',
             'email' => 'required|email',
@@ -46,13 +50,15 @@ class DoctorController extends Controller
         ];
         $this->validate($request, $rules);
 
-        User::create(
+        $user = User::create(
             $request->only('name', 'email', 'cedula', 'address', 'phone')
             + [
                 'role'=> 'doctor',
                 'password' => bcrypt($request->input('password'))
             ]
         );
+
+        $user->specialties()->attach($request->input('specialties'));
 
         return redirect('doctors')->with('success', 'Se ha registrado al doctor: "' . $request->input('name') . '" correctamente');
     }
@@ -77,7 +83,10 @@ class DoctorController extends Controller
     public function edit($id)
     {
         $doctor = User::findOrFail($id);
-        return view('doctors.edit', compact('doctor'));
+        $specialties = Specialty::all();
+        $specialty_ids = $doctor->specialties()->pluck('specialties.id');
+
+        return view('doctors.edit', compact('doctor', 'specialties', 'specialty_ids'));
     }
 
     /**
@@ -108,6 +117,9 @@ class DoctorController extends Controller
 
         $user->fill($data);
         $user->save();
+
+        $user->specialties()->sync($request->input('specialties'));
+
         return redirect('doctors')->with('success', 'Se ha modificado la información del médico: "' . $request->input('name') . '" correctamente');
     }
 
