@@ -16,30 +16,30 @@
     </div>
     <div class="card-body">
         @if ($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                @foreach ($errors->all() as $error)
-                <span class="alert-inner--text"><strong>Error!</strong> {{$error}}</span>
-                @endforeach
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="alert alert-danger" role="alert">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
         <form action="{{url('patients')}}" method="POST">
             @csrf
             <div class="form-group">
-                <label for="name">Especialidad</label>
-                <select name="" id="" class="form-control">
+                <label for="specialty">Especialidad</label>
+                <select name="specialty_id" id="specialty" class="form-control">
+                    <option>Selecione una especialidad</option>
                     @foreach ($specialties as $specialty)
-                        <option value="{{$specialty->name}}">
-                            {{$specialty->name}}
-                        </option>
+                        <option value="{{ $specialty->id }}" @if(old('specialty_id') == $specialty->id) selected @endif>{{ $specialty->name }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="form-group">
                 <label for="email">Médico</label>
-                <select name="" id="" class="form-control"></select>
+                <select name="doctor_id" id="doctor" class="form-control">
+
+                </select>
             </div>
             <div class="form-group">
                 <label for="address">Fecha</label>
@@ -47,17 +47,34 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="ni ni-calendar-grid-58"></i></span>
                     </div>
-                    <input type="text" name="address" class="form-control datepicker" value="{{old('address')}}"
-                    placeholder="Seleccione una fecha">
+                    <input type="text" name="address" class="form-control datepicker"
+                        id="date"
+                        value="{{date('Y-m-d')}}"
+                        data-date-format="yyyy-mm-dd"
+                        data-date-start-date="{{date('Y-m-d')}}"
+                        data-date-end-date="+30d">
                 </div>
             </div>
             <div class="form-group">
-                <label for="phone">Hora de atención</label>
-                <input type="tel" name="phone" class="form-control" value="{{old('phone')}}">
+                <label for="hours">Hora de atención</label>
+                <div id="hours">
+
+                </div>
             </div>
             <div class="form-group">
-                <label for="phone">Número de telefóno / Celular</label>
-                <input type="tel" name="phone" class="form-control" value="{{old('phone')}}">
+                <label for="type">Tipo de consulta</label>
+                <div class="custom-control custom-radio mb-3">
+                    <input type="radio" name="type" id="type1" class="custom-control-input">
+                    <label for="type1" class="custom-control-label"></label>
+                </div>
+                <div class="custom-control custom-radio mb-3">
+                    <input type="radio" name="type" id="type1" class="custom-control-input">
+                    <label for="type1" class="custom-control-label"></label>
+                </div>
+                <div class="custom-control custom-radio mb-3">
+                    <input type="radio" name="type" id="type1" class="custom-control-input">
+                    <label for="type1" class="custom-control-label"></label>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Crear</button>
         </form>
@@ -67,4 +84,5 @@
 
 @section('scripts')
     <script src="{{asset('js/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js')}}"></script>
+    <script src="{{asset('js/appointments/create.js')}}"></script>
 @endsection
