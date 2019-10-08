@@ -4,11 +4,20 @@ namespace App\Services;
 
 use App\Appointment;
 use App\Interfaces\ScheduleServiceInterface;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 use App\WorkDay;
 
 class ScheduleService implements ScheduleServiceInterface
 {
+
+    public function isAvailableInterval($date, $doctorId, Carbon $start)
+    {
+        $exists = Appointment::where('doctor_id', $doctorId)
+                                 ->where('scheduled_date', $date)
+                                 ->where('scheduled_time', $start->format('H:s:i'))
+                                 ->exists();
+        return !$exists; //Estará disponible siempre y cuándo la hora no exista
+    }
 
     private function getDayFromDate($date)
     {
@@ -62,15 +71,14 @@ class ScheduleService implements ScheduleServiceInterface
         while($start < $end){
             $interval = [];
             $interval['start'] = $start->format('g:i A');
+            //Se valida si no existe una cita para está fecha y hora con esté médico
+            $available = $this->isAvailableInterval($date, $doctorId, $start);
             //Se valida que el médico en cuestión no tenga una cita a esa mis hora, en caso de que sí, no se agrega al arreglo de horas
-            $exists = Appointment::where('doctor_id', $doctorId)
-                                 ->where('scheduled_date', $date)
-                                 ->where('scheduled_time', $start->format('H:s:i'))
-                                 ->exists();
             $start->addMinutes(30);
             $interval['end'] = $start->format('g:i A');
 
-            if (!$exists) {
+
+            if ($available) {
                 $intervals[]= $interval;
             }
 
