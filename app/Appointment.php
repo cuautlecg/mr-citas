@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Specialty;
+use Carbon\Carbon;
 
 class Appointment extends Model
 {
@@ -15,4 +17,26 @@ class Appointment extends Model
         'scheduled_time',
         'type'
     ];
+
+    public function specialty()
+    {
+        return $this->belongsTo(Specialty::class);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function patient()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    //accesor
+    //$appointment->schedule_time_12
+    public function getScheduledTime12Attribute()
+    {
+        return (new Carbon($this->scheduled_time))->format('g:i A');
+    }
 }
