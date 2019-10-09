@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Appointment;
+use App\CancelledAppointment;
 use App\Interfaces\ScheduleServiceInterface;
 use App\Specialty;
 use Carbon\Carbon;
@@ -118,13 +119,21 @@ class AppointmentController extends Controller
         return back()->with(compact('notification'));
     }
 
-    public function showCancelForm()
+    public function showCancelForm(Appointment $appointment)
     {
-        return view('appointments.cancel');
+        return view('appointments.cancel', compact('appointment'));
     }
 
-    public function postCancel(Appointment $appointment)
+    public function postCancel(Appointment $appointment, Request $request)
     {
+        if ($request->has('justification')) {
+            $cancellation = new CancelledAppointment();
+            $cancellation->justification = $request->input('justification');
+            $cancellation->cancelled_by = auth()->id();
+            $cancellation-
+
+        }
+
         $appointment->status = 'Cancelada';
         $appointment->save();
 

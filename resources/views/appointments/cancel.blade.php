@@ -19,12 +19,17 @@
             </div>
         @endif
 
-        <form action="" method="POST">
+        <form action="{{ url('/appointments/'.$appointment->id.'/cancel') }}" method="POST">
             @csrf
-            <label for="justification">Por favor, cuentanos el motivo de cancelación:</label>
-            <textarea name="justification" id="justification" rows="4" class="form-control">
-            </textarea>
+            <small>Estás a punto de cancelar tú cita con el médico <strong>{{$appointment->doctor->name}}</strong>
+            el día <strong>{{$appointment->scheduled_date}}</strong></small>
+            <div class="form-group">
+                <label for="justification">Por favor, cuentanos el motivo de cancelación:</label>
+                <textarea required name="justification" id="justification" rows="4" class="form-control">
+                </textarea>
+            </div>
             <button class="btn btn-danger" type="submit">Cancelar cita</button>
+            <a href="{{'/appointments'}}" class="btn btn-primary">Volver atrás</a>
         </form>
     </div>
 </div>
