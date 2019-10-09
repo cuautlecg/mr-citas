@@ -14,7 +14,7 @@ class AddStatusToAppointments extends Migration
     public function up()
     {
         Schema::table('appointments', function (Blueprint $table) {
-            //Reservada, confirmada, atendida, cancelada
+            //Reservada, Confirmada, Atendida, Cancelada
             $table->string('status')->default('Reservada');
         });
     }

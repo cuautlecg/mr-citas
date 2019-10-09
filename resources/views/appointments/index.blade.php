@@ -10,85 +10,46 @@
         </div>
     </div>
     <div class="card-body">
-        @if (session('success'))
-        <div class="alert alert-primary alert-dismissible fade show" role="alert">
-            <span class="alert-inner--text">{{ session('success') }}!</span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+        @if (session('notification'))
+            <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                <span class="alert-inner--text">{{ session('notification') }}!</span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         @endif
-        @if (session('update'))
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <span class="alert-inner--text">{{ session('update') }}!</span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        @endif
-        @if (session('delete'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <span class="alert-inner--text">{{ session('delete') }}!</span>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        @endif
+
+        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="pill" href="#confirmed-appointments" role="tab"
+                    aria-selected="true">
+                    Mis próximas citas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="pill" href="#pending-appointments" role="tab" aria-selected="false">
+                    Citas por confirmar
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="pill" href="#old-appointments" role="tab" aria-selected="false">
+                    Historial de citas
+                </a>
+            </li>
+        </ul>
     </div>
-    <div class="table-responsive">
-        <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Descripción</th>
-                    <th scope="col">Especialidad</th>
-                    <th scope="col">Médico</th>
-                    <th scope="col">Fecha</th>
-                    <th scope="col">Hora de atención</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Opciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($appointments as $appointment)
-                <tr>
-                    <th scope="row">
-                        {{$appointment->description}}
-                    </th>
-                    <td>
-                        {{$appointment->specialty_id}}
-                    </td>
-                    <td>
-                        {{$appointment->doctor_id}}
-                    </td>
-                    <td>
-                        {{$appointment->scheduled_date}}
-                    </td>
-                    <td>
-                        {{$appointment->scheduled_time}}
-                    </td>
-                    <td>
-                        {{$appointment->type}}
-                    </td>
-                    <td>
-                        {{$appointment->status}}
-                    </td>
-                    <td>
-                        <a href="{{url('appointments/' . $appointment->id .'/edit')}}" class="btn btn-primary btn-sm">Editar</a>
-                        <a href="{{url('appointments/' . $appointment->id)}}" class="btn btn-danger btn-sm" onclick="event.preventDefault();
-                            document.getElementById('delete-form').submit();">
-                            Eliminar
-                        </a>
-                        <form id="delete-form" action="{{url('appointments/'.$appointment->id)}}" method="POST"
-                            style="display: none;">
-                            @csrf
-                            @method('DELETE')
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="confirmed-appointments" role="tabpanel"
+            aria-labelledby="pills-home-tab">
+            @include('appointments.confirmed-appointments')
+        </div>
+        <div class="tab-pane fade" id="pending-appointments" role="tabpanel" aria-labelledby="pills-profile-tab">
+            @include('appointments.pending-appointments')
+        </div>
+        <div class="tab-pane fade" id="old-appointments" role="tabpanel" aria-labelledby="pills-profile-tab">
+            @include('appointments.old-appointments')
+        </div>
     </div>
+
 </div>
 @endsection
