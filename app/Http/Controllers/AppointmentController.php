@@ -15,23 +15,52 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        //Patient = citas que le competen
-        //Doctor = ""
+
+        $role = auth()->user()->role;
         //Administrator = all
-        $pendingAppointments = Appointment::where('status', 'Reservada')
-                                          ->where('patient_id', auth()->id())
-                                          ->paginate(10);
 
-        $confirmedAppointments = Appointment::where('status', 'Confirmada')
-                                          ->where('patient_id', auth()->id())
-                                          ->paginate(10);
+        if ($role == 'doctor') {
+            //Doctor = citas asignadas
+            $pendingAppointments = Appointment::where('status', 'Reservada')
+                                              ->where('doctor_id', auth()->id())
+                                              ->paginate(10);
 
-        $oldAppointments = Appointment::whereIn('status', ['Atendida','Cancelada'])
-                                          ->where('patient_id', auth()->id())
-                                          ->paginate(10);
+            $confirmedAppointments = Appointment::where('status', 'Confirmada')
+                                              ->where('doctor_id', auth()->id())
+                                              ->paginate(10);
 
-        return view('appointments.index', compact('confirmedAppointments','pendingAppointments', 'oldAppointments'));
+            $oldAppointments = Appointment::whereIn('status', ['Atendida','Cancelada'])
+                                              ->where('doctor_id', auth()->id())
+                                              ->paginate(10);
+        }else if($role == 'patient'){
+            //Patient = citas que le competen
+            $pendingAppointments = Appointment::where('status', 'Reservada')
+                                              ->where('patient_id', auth()->id())
+                                              ->paginate(10);
+
+            $confirmedAppointments = Appointment::where('status', 'Confirmada')
+                                              ->where('patient_id', auth()->id())
+                                              ->paginate(10);
+
+            $oldAppointments = Appointment::whereIn('status', ['Atendida','Cancelada'])
+                                              ->where('patient_id', auth()->id())
+                                              ->paginate(10);
+        }
+
+        return view('appointments.index',
+               compact(
+                   'confirmedAppointments',
+                   'pendingAppointments',
+                   'oldAppointments',
+                   'role'
+                )
+        );
     }
+
+    public function show(Appointment $appointment){
+        return view('appointments.show', compact('appointment'));
+    }
+
 
     public function create(ScheduleServiceInterface $scheduleService)
     {
@@ -121,17 +150,21 @@ class AppointmentController extends Controller
 
     public function showCancelForm(Appointment $appointment)
     {
-        return view('appointments.cancel', compact('appointment'));
+        if ($appointment->status == 'Confirmada') {
+            return view('appointments.cancel', compact('appointment'));
+        }
+
+        return redirect('/appointments');
     }
 
     public function postCancel(Appointment $appointment, Request $request)
     {
+
         if ($request->has('justification')) {
             $cancellation = new CancelledAppointment();
             $cancellation->justification = $request->input('justification');
             $cancellation->cancelled_by = auth()->id();
-            $cancellation-
-
+            $appointment->cancellation()->save($cancellation);
         }
 
         $appointment->status = 'Cancelada';
@@ -139,6 +172,15 @@ class AppointmentController extends Controller
 
         $notification = 'La cita se ha cancelado correctamente.';
 
-        return back()->with(compact('notification'));
+        return redirect('/appointments')->with(compact('notification'));
+    }
+
+    public function postConfirm(Appointment $appointment){
+        $appointment->status = 'Confirmada';
+        $appointment->save();
+
+        $notification = 'La cita se ha confirmado correctamente.';
+
+        return redirect('/appointments')->with(compact('notification'));
     }
 }

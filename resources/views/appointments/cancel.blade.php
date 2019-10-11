@@ -25,7 +25,7 @@
             el día <strong>{{$appointment->scheduled_date}}</strong></small>
             <div class="form-group">
                 <label for="justification">Por favor, cuentanos el motivo de cancelación:</label>
-                <textarea required name="justification" id="justification" rows="4" class="form-control">
+                <textarea required name="justification" id="justification" rows="3" class="form-control">
                 </textarea>
             </div>
             <button class="btn btn-danger" type="submit">Cancelar cita</button>

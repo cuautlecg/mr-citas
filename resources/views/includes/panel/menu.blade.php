@@ -34,7 +34,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link " href="/specialties">
+            <a class="nav-link " href="/appointments">
                 <i class="ni ni-bullet-list-67 text-orange"></i> Mis citas
             </a>
         </li>
